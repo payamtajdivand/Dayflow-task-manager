@@ -480,7 +480,7 @@ export default function App() {
               onSubmit={addTask}
             >
               <input
-                className="rounded-xl border border-ink-200 px-3 py-2 text-sm text-ink-900 placeholder-ink-700 dark:border-ink-200 dark:bg-ink-900/70 dark:text-ink-200 dark:placeholder-ink-400"
+                className="rounded-xl border border-ink-200 px-3 py-2 text-sm text-ink-900 placeholder-ink-700 dark:border-ink-200 dark:bg-ink-900/70 dark:text-ink-900 dark:placeholder-ink-black"
                 placeholder="Task title"
                 value={form.title}
                 onChange={(event) =>
@@ -507,7 +507,7 @@ export default function App() {
                 <option>High</option>
               </select>
               <input
-                className="rounded-xl border border-ink-200 px-3 py-2 text-sm text-ink-900 placeholder-ink-700 dark:border-ink-700 dark:bg-ink-900/70 dark:text-ink-200 dark:placeholder-ink-400"
+                className="rounded-xl border border-ink-200 px-3 py-2 text-sm text-ink-900 placeholder-ink-700 dark:border-ink-700 dark:bg-ink-900/70 dark:text-ink-200 dark:placeholder-ink-900"
                 placeholder="Tag"
                 value={form.tag}
                 onChange={(event) =>
@@ -631,10 +631,10 @@ export default function App() {
                 value={planForSelected}
                 onChange={(event) => updatePlan(event.target.value)}
               />
-              <div className="rounded-2xl border border-ink-200 bg-white/90 p-4 text-sm text-ink-900 dark:border-ink-700 dark:bg-ink-900/70 dark:text-ink-200">
+              <div className="rounded-2xl border border-ink-200 bg-white/90 p-4 text-sm text-ink-900 dark:border-ink-700 dark:bg-ink-900/70 dark:text-ink-700">
                 {planMode === "Preview" ? (
                   <div
-                    className="markdown-preview space-y-2"
+                    className="markdown-preview space-y-2 "
                     dangerouslySetInnerHTML={{
                       __html: markdownToHtml(planForSelected),
                     }}
@@ -714,7 +714,9 @@ export default function App() {
                   <button
                     key={key}
                     className={`calendar-cell ${
-                      isActive ? "active" : "bg-white/80 text-ink-900 dark:bg-ink-900/70 dark:text-ink-200"
+                      isActive
+                        ? "active"
+                        : "bg-white/80 text-ink-900 dark:bg-ink-900/70 dark:text-ink-200"
                     }`}
                     onClick={() => setSelectedDate(key)}
                   >
@@ -757,7 +759,7 @@ export default function App() {
             </p>
             <div className="mt-4 grid gap-3">
               <div className="rounded-2xl border border-ink-200 bg-white/90 p-4 text-ink-900 dark:border-ink-700 dark:bg-ink-900/70 dark:text-ink-200">
-                <p className="text-xs uppercase tracking-[0.2em] text-ink-700 dark:text-ink-300">
+                <p className="text-xs uppercase tracking-[0.2em] text-ink-700 dark:text-ink-900">
                   Totals
                 </p>
                 <div className="mt-2 flex items-center justify-between text-sm">
@@ -780,7 +782,9 @@ export default function App() {
                 </p>
                 <div className="mt-2 space-y-2 text-sm">
                   {upcoming.length === 0 && (
-                    <p className="text-ink-700 dark:text-ink-300">No upcoming tasks.</p>
+                    <p className="text-ink-700 dark:text-ink-300">
+                      No upcoming tasks.
+                    </p>
                   )}
                   {upcoming.map((task) => (
                     <div
@@ -788,7 +792,9 @@ export default function App() {
                       className="flex items-center justify-between"
                     >
                       <span>{task.title}</span>
-                      <span className="text-xs text-ink-700 dark:text-ink-300">{task.date}</span>
+                      <span className="text-xs text-ink-700 dark:text-ink-300">
+                        {task.date}
+                      </span>
                     </div>
                   ))}
                 </div>
