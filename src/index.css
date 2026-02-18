@@ -17,15 +17,44 @@ body {
   min-height: 100vh;
 }
 
+html.dark body {
+  background: radial-gradient(circle at 10% 20%, rgba(37, 99, 235, 0.22) 0%, transparent 45%),
+    radial-gradient(circle at 90% 10%, rgba(14, 116, 144, 0.22) 0%, transparent 45%),
+    linear-gradient(160deg, #0f172a 0%, #1e3a8a 100%);
+}
+
 .glass {
   background: rgba(255, 255, 255, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(18px);
 }
 
+html.dark .glass {
+  background: rgba(17, 24, 39, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  color: #f8fafc;
+}
+
 .grid-dots {
   background-image: radial-gradient(rgba(15, 23, 42, 0.08) 1px, transparent 1px);
   background-size: 16px 16px;
+}
+
+html.dark .grid-dots {
+  background-image: radial-gradient(rgba(148, 163, 184, 0.2) 1px, transparent 1px);
+}
+
+html.dark .text-ink-700 {
+  color: #ffffff;
+}
+
+html.dark .font-display {
+  color: #ffffff;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: rgba(226, 232, 240, 0.55);
 }
 
 .calendar-cell {
@@ -34,6 +63,10 @@ body {
 
 .calendar-cell.active {
   @apply bg-ink-200 text-ink-900 shadow-glow;
+}
+
+html.dark .calendar-cell.active {
+  @apply bg-sunrise-500 text-white;
 }
 
 .date-pill {

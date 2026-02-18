@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 
 const STORAGE_KEY = 'dayflow-data-v1'
+const THEME_KEY = 'dayflow-theme-mode'
 
 const priorityStyles = {
   Low: 'bg-ink-200 text-ink-900',
@@ -99,6 +100,11 @@ function formatLongDate(key) {
   })
 }
 
+function getSystemTheme() {
+  if (typeof window === 'undefined') return 'light'
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+}
+
 function markdownToHtml(markdown) {
   const escape = (value) =>
     value
@@ -159,6 +165,8 @@ export default function App() {
   const [filter, setFilter] = useState('All')
   const [viewDate, setViewDate] = useState(new Date())
   const [planMode, setPlanMode] = useState('Edit')
+  const [themeMode, setThemeMode] = useState('system')
+  const [theme, setTheme] = useState('light')
   const [form, setForm] = useState({
     title: '',
     time: '',
@@ -168,6 +176,15 @@ export default function App() {
   })
 
   useEffect(() => {
+    const storedThemeMode = localStorage.getItem(THEME_KEY)
+    if (storedThemeMode === 'light' || storedThemeMode === 'dark') {
+      setThemeMode(storedThemeMode)
+      setTheme(storedThemeMode)
+    } else {
+      setThemeMode('system')
+      setTheme(getSystemTheme())
+    }
+
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored) {
       try {
@@ -185,6 +202,30 @@ export default function App() {
     setForm((prev) => ({ ...prev, date: seed.selectedDate }))
     setViewDate(parseDateKey(seed.selectedDate))
   }, [])
+
+  useEffect(() => {
+    if (themeMode === 'system') {
+      setTheme(getSystemTheme())
+    } else {
+      setTheme(themeMode)
+    }
+  }, [themeMode])
+
+  useEffect(() => {
+    const root = document.documentElement
+    root.classList.toggle('dark', theme === 'dark')
+  }, [theme])
+
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-color-scheme: dark)')
+    const handler = () => {
+      if (themeMode === 'system') {
+        setTheme(getSystemTheme())
+      }
+    }
+    media.addEventListener('change', handler)
+    return () => media.removeEventListener('change', handler)
+  }, [themeMode])
 
   useEffect(() => {
     if (data) {
@@ -326,26 +367,69 @@ export default function App() {
     setViewDate(next)
   }
 
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark'
+    setThemeMode(next)
+    localStorage.setItem(THEME_KEY, next)
+  }
+
   if (!data) return null
 
   return (
-    <div className="min-h-screen px-6 py-10">
+    <div className="min-h-screen px-6 py-10 text-ink-900 dark:text-ink-200">
       <header className="mx-auto mb-8 flex max-w-6xl flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-sm uppercase tracking-[0.3em] text-ink-700">Dayflow</p>
-          <h1 className="font-display text-4xl sm:text-5xl">Task Manager Dashboard</h1>
-          <p className="mt-2 text-ink-700">
+          <p className="text-sm uppercase tracking-[0.3em] text-ink-700 dark:text-white">
+            Dayflow
+          </p>
+          <h1 className="font-display text-4xl sm:text-5xl dark:text-white">
+            Task Manager Dashboard
+          </h1>
+          <p className="mt-2 text-ink-700 dark:text-white">
             {formatLongDate(selectedDate)} - {tasksForSelected.length} tasks
           </p>
         </div>
         <div className="flex items-center gap-3">
           <button
-            className="rounded-full bg-ink-900 px-5 py-2 text-sm font-semibold text-white shadow-glow"
+            className="rounded-full bg-ink-900 px-5 py-2 text-sm font-semibold text-white shadow-glow dark:bg-ink-200 dark:text-ink-900"
             onClick={() => setSelectedDate(toDateKey(new Date()))}
           >
             Jump to Today
           </button>
-          <div className="rounded-full border border-ink-200 bg-white/80 px-4 py-2 text-sm">
+          <button
+            className="rounded-full border border-ink-200 bg-white/80 p-2 text-sm dark:border-ink-700 dark:bg-ink-900/70"
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+          >
+            {theme === 'dark' ? (
+              <svg
+                viewBox="0 0 24 24"
+                className="h-5 w-5 text-ink-900 dark:text-white"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 3v2M12 19v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M3 12h2M19 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+              </svg>
+            ) : (
+              <svg
+                viewBox="0 0 24 24"
+                className="h-5 w-5 text-ink-900 dark:text-white"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M21 12.7a8.5 8.5 0 1 1-9.7-9.7 7 7 0 0 0 9.7 9.7z" />
+              </svg>
+            )}
+          </button>
+          <div className="rounded-full border border-ink-200 bg-white/80 px-4 py-2 text-sm dark:border-ink-700 dark:bg-ink-900/70">
             {completionRate}% complete
           </div>
         </div>
@@ -356,10 +440,12 @@ export default function App() {
           <div className="glass rounded-3xl p-6 shadow-glow">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h2 className="font-display text-2xl">Daily To-Do</h2>
-                <p className="text-sm text-ink-700">Create, prioritize, and schedule tasks.</p>
+                <h2 className="font-display text-2xl dark:text-white">Daily To-Do</h2>
+                <p className="text-sm text-ink-700 dark:text-white">
+                  Create, prioritize, and schedule tasks.
+                </p>
               </div>
-              <div className="flex items-center gap-2 rounded-full bg-white/80 p-1 text-sm">
+              <div className="flex items-center gap-2 rounded-full bg-white/80 p-1 text-sm dark:bg-ink-900/70">
                 {['All', 'Active', 'Done'].map((value) => (
                   <button
                     key={value}
@@ -375,23 +461,23 @@ export default function App() {
             </div>
 
             <form
-              className="mt-6 grid gap-3 rounded-2xl border border-ink-200 bg-white/80 p-4 sm:grid-cols-[2fr_1fr_1fr_1fr_1fr]"
+              className="mt-6 grid gap-3 rounded-2xl border border-ink-200 bg-white/80 p-4 sm:grid-cols-[2fr_1fr_1fr_1fr_1fr] dark:border-ink-700 dark:bg-ink-900/70"
               onSubmit={addTask}
             >
               <input
-                className="rounded-xl border border-ink-200 px-3 py-2 text-sm"
+                className="rounded-xl border border-ink-200 px-3 py-2 text-sm dark:border-ink-700 dark:bg-ink-900/70"
                 placeholder="Task title"
                 value={form.title}
                 onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
               />
               <input
                 type="time"
-                className="rounded-xl border border-ink-200 px-3 py-2 text-sm"
+                className="rounded-xl border border-ink-200 px-3 py-2 text-sm dark:border-ink-700 dark:bg-ink-900/70"
                 value={form.time}
                 onChange={(event) => setForm((prev) => ({ ...prev, time: event.target.value }))}
               />
               <select
-                className="rounded-xl border border-ink-200 px-3 py-2 text-sm"
+                className="rounded-xl border border-ink-200 px-3 py-2 text-sm dark:border-ink-700 dark:bg-ink-900/70"
                 value={form.priority}
                 onChange={(event) => setForm((prev) => ({ ...prev, priority: event.target.value }))}
               >
@@ -400,14 +486,14 @@ export default function App() {
                 <option>High</option>
               </select>
               <input
-                className="rounded-xl border border-ink-200 px-3 py-2 text-sm"
+                className="rounded-xl border border-ink-200 px-3 py-2 text-sm dark:border-ink-700 dark:bg-ink-900/70"
                 placeholder="Tag"
                 value={form.tag}
                 onChange={(event) => setForm((prev) => ({ ...prev, tag: event.target.value }))}
               />
               <input
                 type="date"
-                className="rounded-xl border border-ink-200 px-3 py-2 text-sm"
+                className="rounded-xl border border-ink-200 px-3 py-2 text-sm dark:border-ink-700 dark:bg-ink-900/70"
                 value={form.date}
                 onChange={(event) => setForm((prev) => ({ ...prev, date: event.target.value }))}
               />
@@ -428,7 +514,7 @@ export default function App() {
               {tasksForSelected.map((task) => (
                 <div
                   key={task.id}
-                  className="flex flex-wrap items-center gap-3 rounded-2xl border border-ink-200 bg-white/90 px-4 py-3"
+                  className="flex flex-wrap items-center gap-3 rounded-2xl border border-ink-200 bg-white/90 px-4 py-3 dark:border-ink-700 dark:bg-ink-900/70"
                 >
                   <button
                     className={`h-5 w-5 rounded-full border-2 ${
@@ -440,7 +526,9 @@ export default function App() {
                   <div className="flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <h3
-                        className={`font-medium ${task.done ? 'text-ink-700 line-through' : ''}`}
+                        className={`font-medium ${
+                          task.done ? 'text-ink-700 line-through' : 'dark:text-white'
+                        }`}
                       >
                         {task.title}
                       </h3>
@@ -451,7 +539,7 @@ export default function App() {
                       >
                         {task.priority}
                       </span>
-                      <span className="rounded-full bg-ink-200 px-2 py-0.5 text-xs">
+                      <span className="rounded-full bg-ink-200 px-2 py-0.5 text-xs dark:text-white">
                         {task.tag}
                       </span>
                     </div>
@@ -482,11 +570,13 @@ export default function App() {
           <div className="glass rounded-3xl p-6 shadow-glow">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 className="font-display text-2xl">Daily Plan (.md)</h2>
-                <p className="text-sm text-ink-700">Write your day in Markdown and export it.</p>
+                <h2 className="font-display text-2xl dark:text-white">Daily Plan (.md)</h2>
+                <p className="text-sm text-ink-700 dark:text-white">
+                  Write your day in Markdown and export it.
+                </p>
               </div>
-              <div className="flex items-center gap-2 rounded-full bg-white/80 p-1 text-sm">
-                {['Edit', 'Preview'].map((value) => (
+            <div className="flex items-center gap-2 rounded-full bg-white/80 p-1 text-sm dark:bg-ink-900/70">
+              {['Edit', 'Preview'].map((value) => (
                   <button
                     key={value}
                     onClick={() => setPlanMode(value)}
@@ -502,11 +592,11 @@ export default function App() {
 
             <div className="mt-4 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
               <textarea
-                className="min-h-[220px] rounded-2xl border border-ink-200 bg-white/90 p-4 text-sm font-mono"
+                className="min-h-[220px] rounded-2xl border border-ink-200 bg-white/90 p-4 text-sm font-mono dark:border-ink-700 dark:bg-ink-900/70"
                 value={planForSelected}
                 onChange={(event) => updatePlan(event.target.value)}
               />
-              <div className="rounded-2xl border border-ink-200 bg-white/90 p-4 text-sm">
+              <div className="rounded-2xl border border-ink-200 bg-white/90 p-4 text-sm dark:border-ink-700 dark:bg-ink-900/70">
                 {planMode === 'Preview' ? (
                   <div
                     className="markdown-preview space-y-2"
@@ -526,7 +616,9 @@ export default function App() {
               >
                 Download .md
               </button>
-              <span className="text-xs text-ink-700">Saved locally in your browser.</span>
+              <span className="text-xs text-ink-700 dark:text-white">
+                Saved locally in your browser.
+              </span>
             </div>
           </div>
         </section>
@@ -535,28 +627,28 @@ export default function App() {
           <div className="glass rounded-3xl p-6 shadow-glow">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 className="font-display text-2xl">Calendar</h2>
-                <p className="text-sm text-ink-700">Click a day to view its tasks.</p>
+                <h2 className="font-display text-2xl dark:text-white">Calendar</h2>
+                <p className="text-sm text-ink-700 dark:text-white">Click a day to view its tasks.</p>
               </div>
               <div className="flex flex-wrap items-center gap-2 text-sm">
-                <span className="rounded-full border border-ink-200 bg-white/80 px-3 py-1 font-medium">
+                <span className="rounded-full border border-ink-200 bg-white/80 px-3 py-1 font-medium dark:border-ink-700 dark:bg-ink-900/70">
                   {viewDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                 </span>
                 <button
-                  className="rounded-full border border-ink-200 bg-white/80 px-3 py-1"
+                  className="rounded-full border border-ink-200 bg-white/80 px-3 py-1 dark:border-ink-700 dark:bg-ink-900/70"
                   onClick={() => changeMonth(-1)}
                 >
                   Prev
                 </button>
                 <button
-                  className="rounded-full border border-ink-200 bg-white/80 px-3 py-1"
+                  className="rounded-full border border-ink-200 bg-white/80 px-3 py-1 dark:border-ink-700 dark:bg-ink-900/70"
                   onClick={() => changeMonth(1)}
                 >
                   Next
                 </button>
               </div>
             </div>
-            <div className="mt-4 grid grid-cols-7 gap-2 text-xs uppercase text-ink-700">
+            <div className="mt-4 grid grid-cols-7 gap-2 text-xs uppercase text-ink-700 dark:text-white">
               {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((label) => (
                 <div key={label} className="text-center">
                   {label}
@@ -575,7 +667,9 @@ export default function App() {
                 return (
                   <button
                     key={key}
-                    className={`calendar-cell ${isActive ? 'active' : 'bg-white/80'}`}
+                    className={`calendar-cell ${
+                      isActive ? 'active' : 'bg-white/80 dark:bg-ink-900/70'
+                    }`}
                     onClick={() => setSelectedDate(key)}
                   >
                     <div className="flex items-center justify-between text-xs">
@@ -606,10 +700,12 @@ export default function App() {
           </div>
 
           <div className="glass rounded-3xl p-6 shadow-glow grid-dots">
-            <h2 className="font-display text-2xl">Dashboard Snapshot</h2>
-            <p className="mt-1 text-sm text-ink-700">Extra insights to keep momentum.</p>
+            <h2 className="font-display text-2xl dark:text-white">Dashboard Snapshot</h2>
+            <p className="mt-1 text-sm text-ink-700 dark:text-white">
+              Extra insights to keep momentum.
+            </p>
             <div className="mt-4 grid gap-3">
-              <div className="rounded-2xl border border-ink-200 bg-white/90 p-4">
+              <div className="rounded-2xl border border-ink-200 bg-white/90 p-4 dark:border-ink-700 dark:bg-ink-900/70">
                 <p className="text-xs uppercase tracking-[0.2em] text-ink-700">Totals</p>
                 <div className="mt-2 flex items-center justify-between text-sm">
                   <span>Total tasks</span>
@@ -625,7 +721,7 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-ink-200 bg-white/90 p-4">
+              <div className="rounded-2xl border border-ink-200 bg-white/90 p-4 dark:border-ink-700 dark:bg-ink-900/70">
                 <p className="text-xs uppercase tracking-[0.2em] text-ink-700">Upcoming</p>
                 <div className="mt-2 space-y-2 text-sm">
                   {upcoming.length === 0 && <p className="text-ink-700">No upcoming tasks.</p>}
@@ -638,7 +734,7 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-ink-200 bg-white/90 p-4">
+              <div className="rounded-2xl border border-ink-200 bg-white/90 p-4 dark:border-ink-700 dark:bg-ink-900/70">
                 <p className="text-xs uppercase tracking-[0.2em] text-ink-700">Focus Meter</p>
                 <div className="mt-3 h-3 rounded-full bg-ink-200">
                   <div
