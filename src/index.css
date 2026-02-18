@@ -104,6 +104,17 @@ html.dark .calendar-cell.active {
   @apply font-display text-ink-900;
 }
 
+html.dark .markdown-preview {
+  color: #0b0d12;
+  border-radius: 0.75rem;
+}
+
+html.dark .markdown-preview h1,
+html.dark .markdown-preview h2,
+html.dark .markdown-preview h3 {
+  color: #0b0d12;
+}
+
 .markdown-preview ul {
   @apply list-disc pl-5;
 }
