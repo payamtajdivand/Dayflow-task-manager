@@ -33,7 +33,19 @@ body {
 }
 
 .calendar-cell.active {
-  @apply bg-ink-900 text-white shadow-glow;
+  @apply bg-ink-200 text-ink-900 shadow-glow;
+}
+
+.date-pill {
+  @apply inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-semibold;
+}
+
+.date-pill-inactive {
+  @apply text-ink-900;
+}
+
+.date-pill-active {
+  @apply text-ink-900;
 }
 
 .markdown-preview h1,

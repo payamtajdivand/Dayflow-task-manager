@@ -533,12 +533,15 @@ export default function App() {
 
         <section className="grid gap-6">
           <div className="glass rounded-3xl p-6 shadow-glow">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="font-display text-2xl">Calendar</h2>
                 <p className="text-sm text-ink-700">Click a day to view its tasks.</p>
               </div>
-              <div className="flex items-center gap-2 text-sm">
+              <div className="flex flex-wrap items-center gap-2 text-sm">
+                <span className="rounded-full border border-ink-200 bg-white/80 px-3 py-1 font-medium">
+                  {viewDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                </span>
                 <button
                   className="rounded-full border border-ink-200 bg-white/80 px-3 py-1"
                   onClick={() => changeMonth(-1)}
@@ -576,16 +579,20 @@ export default function App() {
                     onClick={() => setSelectedDate(key)}
                   >
                     <div className="flex items-center justify-between text-xs">
-                      <span>{cell.getDate()}</span>
+                      <span
+                        className={`date-pill ${
+                          isActive ? 'date-pill-active' : 'date-pill-inactive'
+                        }`}
+                      >
+                        {cell.getDate()}
+                      </span>
                       {hasPlan && <span className="text-[10px]">MD</span>}
                     </div>
                     <div className="mt-2 flex items-center gap-1">
                       {Array.from({ length: Math.min(count, 3) }).map((_, dotIndex) => (
                         <span
                           key={`${key}-dot-${dotIndex}`}
-                          className={`h-1.5 w-1.5 rounded-full ${
-                            isActive ? 'bg-white' : 'bg-ink-900'
-                          }`}
+                          className="h-1.5 w-1.5 rounded-full bg-ink-900"
                         />
                       ))}
                       {count > 3 && (
