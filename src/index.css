@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  background: #f7f4ef;
+}
+
+body {
+  @apply font-body text-ink-900;
+  background: radial-gradient(circle at 10% 20%, #fff1e7 0%, transparent 50%),
+    radial-gradient(circle at 90% 10%, #e6f7fa 0%, transparent 45%),
+    linear-gradient(160deg, #fdf6f0 0%, #f3f0ff 100%);
+  min-height: 100vh;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(18px);
+}
+
+.grid-dots {
+  background-image: radial-gradient(rgba(15, 23, 42, 0.08) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+.calendar-cell {
+  @apply rounded-xl border border-transparent p-2 transition hover:border-ink-200;
+}
+
+.calendar-cell.active {
+  @apply bg-ink-900 text-white shadow-glow;
+}
+
+.markdown-preview h1,
+.markdown-preview h2,
+.markdown-preview h3 {
+  @apply font-display text-ink-900;
+}
+
+.markdown-preview ul {
+  @apply list-disc pl-5;
+}
+
+.markdown-preview code {
+  @apply font-mono text-sm bg-ink-200 px-1 py-0.5 rounded;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.2);
+  border-radius: 999px;
+}
